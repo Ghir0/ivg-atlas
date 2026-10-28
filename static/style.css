@@ -22,6 +22,9 @@
 }
 
 *,*::before,*::after{box-sizing:border-box}
+/* l'attributo hidden deve vincere sui display:flex/grid delle card:
+   senza questa riga i filtri contano le voci giuste ma non nascondono nulla */
+[hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%}
 body{
   margin:0;background:var(--bg);color:var(--ink);

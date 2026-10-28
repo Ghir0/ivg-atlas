@@ -113,7 +113,10 @@
 
   /* ---------------- filtri ---------------- */
   var form = document.getElementById("filters");
-  if (form) {
+  // Nella build statica i filtri lavorano sulle card nel DOM (secondo blocco):
+  // qui non si deve ricaricare la pagina, altrimenti il filtro passa dal
+  // server che non esiste e la griglia torna piena.
+  if (form && form.dataset.static !== "1") {
     var timer = null;
     form.querySelectorAll("[data-autosubmit]").forEach(function (el) {
       if (el.tagName === "SELECT") {
@@ -356,6 +359,13 @@
   var countEl = document.querySelector(".count");
   var grid = document.querySelector(".grid");
   var empty = null;
+  var clear = null;
+
+  function syncClear() {
+    if (!clear) return;
+    var any = ["q", "paese", "area", "tipologia", "uso", "registro", "lusso"].some(val);
+    clear.style.display = any ? "" : "none";
+  }
 
   function norm(s) {
     return (s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -408,6 +418,7 @@
       if (p[1] && !(p[0] === "q" && !document.getElementById("q").value.trim())) qs.set(p[0], p[1]);
     });
     history.replaceState(null, "", qs.toString() ? "?" + qs.toString() : location.pathname);
+    syncClear();
   }
 
   function reset() {
@@ -423,23 +434,18 @@
   form.addEventListener("change", apply);
 
   var clear = document.createElement("a");
+  clear.id = "clear-static";
   clear.className = "clear";
   clear.href = "#";
   clear.textContent = "Azzera filtri";
   clear.style.display = "none";
   clear.addEventListener("click", function (e) { e.preventDefault(); reset(); });
   if (countEl && countEl.parentNode) countEl.parentNode.appendChild(clear);
-  var obs = function () {
-    var any = ["q", "paese", "area", "tipologia", "uso", "registro", "lusso"].some(val);
-    clear.style.display = any ? "" : "none";
-  };
-  form.addEventListener("input", obs);
-  form.addEventListener("change", obs);
 
   // stato iniziale: rispetta eventuali parametri nel link condiviso
   var sp = new URLSearchParams(location.search);
   ["q", "paese", "area", "tipologia", "uso", "registro", "lusso"].forEach(function (id) {
     if (sp.get(id)) { var el = document.getElementById(id); if (el) el.value = sp.get(id); }
   });
-  apply(); obs();
+  apply();
 })();

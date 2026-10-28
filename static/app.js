@@ -388,9 +388,14 @@
       if (ok && area && d.area !== area) ok = false;
       if (ok && tip && d.tipologia !== tip) ok = false;
       if (ok && uso && (d.usi || "").split(",").indexOf(uso) === -1) ok = false;
-      if (ok && reg && d.registro !== reg) ok = false;
+      if (ok && reg) {
+        // stessa semantica del server: "entrambi" appartiene a tutti e due i registri
+        if (reg === "entrambi") { if (d.registro !== "entrambi") ok = false; }
+        else if (d.registro !== reg && d.registro !== "entrambi") ok = false;
+      }
       if (ok && lusso) {
-        if (lusso === "non-classificato" ? d.lusso !== "" : d.lusso !== lusso) ok = false;
+        if (lusso === "non-classificato") { if (d.lusso !== "") ok = false; }
+        else if (d.lusso !== lusso && d.lusso !== "entrambi") ok = false;
       }
       c.hidden = !ok;
       if (ok) shown++;
